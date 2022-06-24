@@ -4,8 +4,7 @@ class Node
   include Comparable
   def initialize(data)
     @data = data
-    @left = nil
-    @right = nil
+    @left, @right = nil
   end
 
   def <=>(other)
@@ -42,19 +41,31 @@ class Tree
     print(node.right)
   end
 
-  def search(data, root = @root)
+  def find(data, root = @root)
     return root if root.nil? || root.data == data
 
-    root.data < data ? search(data, root.right) : search(data, root.left)
+    root.data < data ? find(data, root.right) : find(data, root.left)
   end
 
-  def insert(value)
+  def insert(data)
+    @root = insert_rec(data)
+  end
 
+  def insert_rec(data, root = @root)
+    return Node.new(data) if root.nil?
+
+    return root.data if root.data.nil?
+
+    if data < root.data
+      root.left = insert_rec(data, root.left)
+    elsif data > root.data
+      root.right = insert_rec(data, root.right)
+    end
+    root
   end
 end
 
-# tree = Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
-tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
+tree = Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
+# tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
 
-# p tree.print
-p tree.search(6)
+p tree.print

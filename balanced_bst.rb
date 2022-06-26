@@ -16,7 +16,8 @@ class Tree
   attr_accessor :root
 
   def initialize(array)
-    @root = build_tree(array.sort.uniq, 0, array.length - 1)
+    array.sort!.uniq!
+    @root = build_tree(array, 0, array.length - 1)
   end
 
   def build_tree(array, first, last)
@@ -63,9 +64,64 @@ class Tree
     end
     root
   end
+
+  def delete(data, root = @root)
+    # Bad case
+    return root if root.nil?
+
+    p root.data
+    # If the key to be deleted
+    # is smaller than the root's
+    # key then it lies in left subtree
+    if data < root.data
+      root.left = delete(data, root.left)
+    # If the kye to be delete
+    # is greater than the root's key
+    # then it lies in right subtree
+    elsif data > root.data
+      root.right = delete(data, root.right)
+    # If key is same as root's key, then this is the node
+    # to be deleted
+    else
+      # Node with only one child or no child
+      if root.left.nil?
+        tmp = root.right
+        root = nil
+        return tmp
+      elsif root.right.nil?
+        tmp = root.left
+        root = nil
+        return tmp
+      end
+      # Node with two children:
+      # Get the inorder successor
+      # (smallest in the right subtree)
+      tmp = find_min_value
+      # Copy the inorder successor's
+      # content to this node
+      root.data = tmp.data
+      # Delete the inorder successor
+      root.right = delete(tmp.key, root.right)
+    end
+    root
+  end
+
+  def find_min_value(root = @root)
+    current = root
+    current = current.left until current.left.nil?
+    current
+  end
 end
 
 tree = Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
 # tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
 
+p tree.print
+puts
+# tree.insert(98)
+# puts
+# p tree.print
+# puts
+tree.delete(1)
+puts
 p tree.print

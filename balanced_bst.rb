@@ -1,4 +1,4 @@
-class Node
+class TreeNode
   attr_accessor :data, :left, :right
 
   include Comparable
@@ -12,7 +12,63 @@ class Node
   end
 end
 
-class Tree
+class QNode
+  attr_accessor :data, :next
+
+  def initialize(node)
+    @data = node
+    @next = nil
+  end
+end
+
+class Queue
+  attr_accessor :head, :tail, :count
+
+  def initialize
+    @head, @tail = nil
+    @count = 0
+  end
+
+  def size
+    @count
+  end
+
+  def empty?
+    @count.zero?
+  end
+
+  #  Add new node of queue
+  def enqueue(treenode)
+    #  Create a new queue node
+    node = QNode.new(treenode)
+    #  Add first element into queue OR
+    #  Add node at the end using tail
+    @head.nil? ? @head = node : @tail.next = node
+    @count += 1
+    @tail = node
+  end
+
+  #  Delete a element into queue
+  def dequeue
+    #  Leave if Empty Queue
+    return if @head.nil?
+
+    #  Visit next node
+    @head = @head.next
+    @count -= 1
+    #  When deleting a last node of linked list
+    @tail = nil if head.nil?
+  end
+
+  #  Get front node
+  def peek
+    return nil if @head.nil?
+
+    @head.data
+  end
+end
+
+class BinaryTree
   attr_accessor :root
 
   def initialize(array)
@@ -28,18 +84,18 @@ class Tree
           else
             ((first + last - 1) / 2) + 1
           end
-    node = Node.new(array[mid])
+    node = TreeNode.new(array[mid])
     node.left = build_tree(array, first, mid - 1)
     node.right = build_tree(array, mid + 1, last)
     node
   end
 
-  def print(node = @root)
+  def display(node = @root)
     return if node.nil?
 
-    puts node.data
-    print(node.left)
-    print(node.right)
+    print "#{node.data} "
+    display(node.left)
+    display(node.right)
   end
 
   def find(data, root = @root)
@@ -53,7 +109,7 @@ class Tree
   end
 
   def insert_rec(data, root = @root)
-    return Node.new(data) if root.nil?
+    return TreeNode.new(data) if root.nil?
 
     return root.data if root.data.nil?
 
@@ -69,7 +125,6 @@ class Tree
     # Bad case
     return root if root.nil?
 
-    p root.data
     # If the key to be deleted
     # is smaller than the root's
     # key then it lies in left subtree
@@ -111,17 +166,39 @@ class Tree
     current = current.left until current.left.nil?
     current
   end
+
+  ###
+  ##
+  #   utiliser un array comme queue (quand même garder la classe ?)
+  ##
+  ###
+  def level_order
+    return if @root.nil?
+
+    q = Queue.new
+    node = @root
+    loop do
+      q.enqueue(node.left) unless node.left.nil?
+      q.enqueue(node.right) unless node.right.nil?
+      p "queue => [#{q.head.data.data} // #{q.tail.data.data}]"
+      #  Display level node
+      print(' ', node.data)
+      #  Remove current node
+      q.dequeue
+      #  Get new head
+      node = q.peek
+      break node if q.empty? || node.nil?
+    end
+  end
 end
 
-tree = Tree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
+tree = BinaryTree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
 # tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
 
-p tree.print
+p tree.display
 puts
 # tree.insert(98)
 # puts
-# p tree.print
+# p tree.display
 # puts
-tree.delete(1)
-puts
-p tree.print
+tree.level_order

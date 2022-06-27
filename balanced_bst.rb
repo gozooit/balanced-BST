@@ -1,3 +1,4 @@
+# Class for node in the binary tree
 class TreeNode
   attr_accessor :data, :left, :right
 
@@ -12,21 +13,21 @@ class TreeNode
   end
 end
 
-class QNode
-  attr_accessor :data, :next
-
-  def initialize(node)
-    @data = node
-    @next = nil
-  end
-end
-
+# Class about the queue
 class Queue
-  attr_accessor :head, :tail, :count
+  attr_accessor :array, :count
 
   def initialize
-    @head, @tail = nil
+    @array = []
     @count = 0
+  end
+
+  def head
+    @array.first
+  end
+
+  def tail
+    @array.last
   end
 
   def size
@@ -38,36 +39,24 @@ class Queue
   end
 
   #  Add new node of queue
-  def enqueue(treenode)
-    #  Create a new queue node
-    node = QNode.new(treenode)
+  def enqueue(node)
     #  Add first element into queue OR
     #  Add node at the end using tail
-    @head.nil? ? @head = node : @tail.next = node
+    @array.push(node)
     @count += 1
-    @tail = node
   end
 
   #  Delete a element into queue
   def dequeue
     #  Leave if Empty Queue
-    return if @head.nil?
+    return if @array.empty?
 
-    #  Visit next node
-    @head = @head.next
+    @array.shift
     @count -= 1
-    #  When deleting a last node of linked list
-    @tail = nil if head.nil?
-  end
-
-  #  Get front node
-  def peek
-    return nil if @head.nil?
-
-    @head.data
   end
 end
 
+# Class about the binary tree
 class BinaryTree
   attr_accessor :root
 
@@ -167,27 +156,41 @@ class BinaryTree
     current
   end
 
-  ###
-  ##
-  #   utiliser un array comme queue (quand même garder la classe ?)
-  ##
-  ###
-  def level_order
+  #  Explore Tree by level order traversal method
+  def levelorder
     return if @root.nil?
 
     q = Queue.new
     node = @root
+    levelorder_array = []
     loop do
       q.enqueue(node.left) unless node.left.nil?
       q.enqueue(node.right) unless node.right.nil?
-      p "queue => [#{q.head.data.data} // #{q.tail.data.data}]"
-      #  Display level node
-      print(' ', node.data)
-      #  Remove current node
+      #  Yield current node if block given, else push node.data into array
+      block_given? ? yield(node) : levelorder_array.push(node.data)
+      node = q.head
+      break if q.empty? || node.nil?
+
       q.dequeue
-      #  Get new head
-      node = q.peek
-      break node if q.empty? || node.nil?
+    end
+    return levelorder_array unless block_given?
+  end
+
+  # Ne fonctionne pas parce qu'il reprend le left alors qu'il est déjà traité
+  def inorder(node = @root, q = Queue.new)
+    return if node.nil?
+
+    inorder_array = []
+    node = q.head unless q.empty?
+    until node.left.nil?
+      q.enqueue(node)
+      node = node.left
+    end
+    node = q.head
+    block_given? ? yield(node) : inorder_array.push(node.data)
+    q.delete
+    unless node.right.nil?
+      q.enqueue(node.right)
     end
   end
 end
@@ -201,4 +204,4 @@ puts
 # puts
 # p tree.display
 # puts
-tree.level_order
+p tree.levelorder

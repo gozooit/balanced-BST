@@ -15,19 +15,20 @@ end
 
 # Class about the queue
 class Queue
-  attr_accessor :array, :count
+  attr_accessor :current, :discovered, :count
 
   def initialize
-    @array = []
+    @current = []
+    @discovered = []
     @count = 0
   end
 
   def head
-    @array.first
+    @current.first
   end
 
   def tail
-    @array.last
+    @current.last
   end
 
   def size
@@ -42,16 +43,16 @@ class Queue
   def enqueue(node)
     #  Add first element into queue OR
     #  Add node at the end using tail
-    @array.push(node)
+    @current.push(node)
     @count += 1
   end
 
   #  Delete a element into queue
   def dequeue
     #  Leave if Empty Queue
-    return if @array.empty?
+    return if @current.empty?
 
-    @array.shift
+    @discovered.push(@current.shift)
     @count -= 1
   end
 end
@@ -177,21 +178,25 @@ class BinaryTree
   end
 
   # Ne fonctionne pas parce qu'il reprend le left alors qu'il est déjà traité
-  def inorder(node = @root, q = Queue.new)
-    return if node.nil?
+  def inorder
+    return if @root.nil?
 
+    q = Queue.new
+    node = @root
     inorder_array = []
-    node = q.head unless q.empty?
-    until node.left.nil?
-      q.enqueue(node)
-      node = node.left
+    loop do
+    #   unless q.discovered.include?(node)
+      until node.left.nil? || q.discovered.include?(node)
+        q.enqueue(node)
+        node = node.left
+      end
+      node = q.head unless q.empty?
+      block_given? ? yield(node) : inorder_array.push(node.data)
+      q.dequeue
+      q.enqueue(node.right) unless q.discovered.include?(node) || node.right.nil?
+      break if q.empty? || node.nil?
     end
-    node = q.head
-    block_given? ? yield(node) : inorder_array.push(node.data)
-    q.delete
-    unless node.right.nil?
-      q.enqueue(node.right)
-    end
+    inorder_array unless block_given?
   end
 end
 
@@ -204,4 +209,4 @@ puts
 # puts
 # p tree.display
 # puts
-p tree.levelorder
+p tree.inorder

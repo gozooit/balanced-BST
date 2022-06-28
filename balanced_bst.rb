@@ -44,6 +44,7 @@ class Queue
     #  Add first element into queue OR
     #  Add node at the end using tail
     @current.push(node)
+    p "enqueued node #{node.data}"
     @count += 1
   end
 
@@ -186,14 +187,17 @@ class BinaryTree
     inorder_array = []
     loop do
     #   unless q.discovered.include?(node)
-      until node.left.nil? || q.discovered.include?(node)
+      until node.left.nil? || q.discovered.include?(node.left)
         q.enqueue(node)
         node = node.left
       end
-      node = q.head unless q.empty?
       block_given? ? yield(node) : inorder_array.push(node.data)
+      p "queue = #{q.current.map {|i| i.data}.to_s}"
+      node = q.head unless q.empty?
       q.dequeue
-      q.enqueue(node.right) unless q.discovered.include?(node) || node.right.nil?
+      p "discovered = #{q.discovered.map {|i| i.data}.to_s}"
+      q.enqueue(node.right) unless q.discovered.include?(node.right) || node.right.nil?
+      p "queue = #{q.current.map {|i| i.data}.to_s}"
       break if q.empty? || node.nil?
     end
     inorder_array unless block_given?
@@ -203,7 +207,7 @@ end
 tree = BinaryTree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
 # tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
 
-p tree.display
+p tree.levelorder
 puts
 # tree.insert(98)
 # puts

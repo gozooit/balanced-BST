@@ -43,6 +43,8 @@ class Queue
   def enqueue(node)
     #  Add first element into queue OR
     #  Add node at the end using tail
+    return if @discovered.include?(node)
+
     @current.push(node)
     p "enqueued node #{node.data}"
     @count += 1
@@ -187,16 +189,19 @@ class BinaryTree
     inorder_array = []
     loop do
     #   unless q.discovered.include?(node)
+      node = q.head unless q.empty?
       until node.left.nil? || q.discovered.include?(node.left)
+        p '----- enqueue left'
         q.enqueue(node)
         node = node.left
       end
+
       block_given? ? yield(node) : inorder_array.push(node.data)
       p "queue = #{q.current.map {|i| i.data}.to_s}"
-      node = q.head unless q.empty?
       q.dequeue
       p "discovered = #{q.discovered.map {|i| i.data}.to_s}"
-      q.enqueue(node.right) unless q.discovered.include?(node.right) || node.right.nil?
+      p '----- enqueue right'
+      q.enqueue(node.right) unless node.right.nil? || q.discovered.include?(node.right)
       p "queue = #{q.current.map {|i| i.data}.to_s}"
       break if q.empty? || node.nil?
     end

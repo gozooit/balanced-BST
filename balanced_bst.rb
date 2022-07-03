@@ -189,19 +189,24 @@ class BinaryTree
     inorder_array = []
     loop do
     #   unless q.discovered.include?(node)
-      node = q.head unless q.empty?
+      p "node = #{node.data} #{q.discovered.include?(node.left) unless node.left.nil?}"
       until node.left.nil? || q.discovered.include?(node.left)
         p '----- enqueue left'
         q.enqueue(node)
         node = node.left
       end
 
+      node = q.head unless q.empty?
       block_given? ? yield(node) : inorder_array.push(node.data)
       p "queue = #{q.current.map {|i| i.data}.to_s}"
       q.dequeue
       p "discovered = #{q.discovered.map {|i| i.data}.to_s}"
       p '----- enqueue right'
-      q.enqueue(node.right) unless node.right.nil? || q.discovered.include?(node.right)
+      p "node = #{node.data} #{q.discovered.include?(node.right) unless node.right.nil?}"
+      unless node.right.nil? || q.discovered.include?(node.right)
+        q.enqueue(node.right)
+        node = node.right
+      end
       p "queue = #{q.current.map {|i| i.data}.to_s}"
       break if q.empty? || node.nil?
     end

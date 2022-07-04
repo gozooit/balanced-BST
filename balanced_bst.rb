@@ -180,6 +180,18 @@ class BinaryTree
     return levelorder_array unless block_given?
   end
 
+  def tmp
+    return if @root.nil?
+
+    q = Queue.new
+    node = @root
+    inorder_array = []
+    loop do
+      # unless node.right.nil?
+    end
+    inorder_array unless block_given?
+  end
+
   # Ne fonctionne pas parce qu'il reprend le left alors qu'il est déjà traité
   def inorder
     return if @root.nil?
@@ -189,25 +201,34 @@ class BinaryTree
     inorder_array = []
     loop do
     #   unless q.discovered.include?(node)
-      p "node = #{node.data} #{q.discovered.include?(node.left) unless node.left.nil?}"
+
       until node.left.nil? || q.discovered.include?(node.left)
-        p '----- enqueue left'
-        q.enqueue(node)
+        # p "node = #{node.data} #{q.discovered.include?(node.left) unless node.left.nil?}"
+        # p '----- enqueue left'
+        q.enqueue(node.left)
         node = node.left
       end
 
-      node = q.head unless q.empty?
-      block_given? ? yield(node) : inorder_array.push(node.data)
-      p "queue = #{q.current.map {|i| i.data}.to_s}"
-      q.dequeue
-      p "discovered = #{q.discovered.map {|i| i.data}.to_s}"
-      p '----- enqueue right'
-      p "node = #{node.data} #{q.discovered.include?(node.right) unless node.right.nil?}"
+      p "loop 1 --- #{node.data}"
+
+      loop do
+        block_given? ? yield(node) : inorder_array.push(node.data)
+      # p "queue = #{q.current.map {|i| i.data}.to_s}"
+        q.dequeue
+        node = q.head unless q.empty?
+        break if node.right.nil?
+      end
+
+      p "loop 2 --- #{node.data}"
+
+      # p "discovered = #{q.discovered.map {|i| i.data}.to_s}"
+      # p "node = #{node.data} #{q.discovered.include?(node.right) unless node.right.nil?}"
       unless node.right.nil? || q.discovered.include?(node.right)
+        # p '----- enqueue right'
         q.enqueue(node.right)
         node = node.right
       end
-      p "queue = #{q.current.map {|i| i.data}.to_s}"
+      # p "queue = #{q.current.map {|i| i.data}.to_s}"
       break if q.empty? || node.nil?
     end
     inorder_array unless block_given?

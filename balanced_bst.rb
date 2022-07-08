@@ -49,7 +49,7 @@ class Queue
 
   #  Add new node of queue
   def enqueue(node)
-    return if @discovered.include?(node)
+    return if queued?(node)
 
     @current.push(node)
     # p "enqueued node #{node.data}"
@@ -59,7 +59,7 @@ class Queue
 
   # reverse enqueue
   def renqueue(node)
-    return if @discovered.include?(node)
+    return if queued?(node)
 
     @current.unshift(node)
     # p "enqueued node #{node.data}"
@@ -215,9 +215,10 @@ class BinaryTree
         node = q.head unless q.empty?
         block_given? ? yield(node) : inorder_array.push(node.data)
         q.dequeue
-        next if !node.right.nil? || q.empty?
+        next if node.right.nil? || q.queued?(node.right)
 
         node = node.right
+        p node
         q.renqueue(node)
         break
       end

@@ -27,6 +27,10 @@ class Queue
     @discovered.map(&:data)
   end
 
+  def current_queue
+    @current.map(&:data)
+  end
+
   def head
     @current.first
   end
@@ -63,6 +67,14 @@ class Queue
     @current.unshift(node)
     # p "queue #{@current.map(&:data)}"
     @count += 1
+  end
+
+  def enqueue_left(node, reverse: false)
+    loop do
+      reverse ? renqueue(node) : enqueue(node)
+      node.left.nil? || queued?(node.left) ? break : node = node.left
+    end
+    self
   end
 
   #  Delete a element into queue
@@ -204,10 +216,7 @@ class BinaryTree
     inorder_array = []
     loop do
       # unless node.right.nil?
-      loop do
-        q.renqueue(node)
-        node.left.nil? || q.queued?(node.left) ? break : node = node.left
-      end
+      q.enqueue_left(node, reverse: true)
 
       loop do
         q.empty? ? break : node = q.head
@@ -225,61 +234,39 @@ class BinaryTree
     inorder_array unless block_given?
   end
 
-  # Ne fonctionne pas parce qu'il reprend le left alors qu'il est déjà traité
-  # def inorder
-  #   return if @root.nil?
+  def preorder
+    return if @root.nil?
 
-  #   q = Queue.new
-  #   node = @root
-  #   inorder_array = []
-  #   loop do
-  #   #   unless q.discovered.include?(node)
+    q = Queue.new
+    node = @root
+    preorder_array = []
 
-  #     p '-------- left'
-  #     # until node.left.nil? || q.discovered.include?(node.left)
-  #     #   p "node = #{node.data} #{q.discovered.include?(node.left) unless node.left.nil?}"
-  #     #   # p '----- enqueue left'
-  #     #   q.renqueue(node)
-  #     #   node = node.left
-  #     # end
-  #     loop do
-  #       q.renqueue(node)
-  #       node.left.nil? || q.discovered.include?(node.left) ? break : node = node.left
-  #     end
+    loop do
+      q.renqueue(node)
+      block_given? ? yield(node) : preorder_array.push(node.data)
+      node.left.nil? ? break : node = node.left
+    end
+    p q.current_queue
 
-  #     loop do
-  #       p "-------- yield #{node.data}"
-  #       block_given? ? yield(node) : inorder_array.push(node.data)
-  #       # p "queue = #{q.current.map {|i| i.data}.to_s}"
-  #       node = q.head unless q.empty?
-  #       q.dequeue
-  #       p "discovered #{q.discovered_data(&:data)}"
-  #       break if node.right.nil? || q.empty?
-  #     end
+    loop do
+      q.size == 1 ? break : q.dequeue
+      next if q.head.right.nil?
 
-  #     p '--------  right'
+      block_given? ? yield(q.head.right) : preorder_array.push(q.head.right.data)
+    end
 
-  #     # p "discovered = #{q.discovered.map {|i| i.data}.to_s}"
-  #     # p "node = #{node.data} #{q.discovered.include?(node.right) unless node.right.nil?}"
-  #     unless node.right.nil? || q.discovered.include?(node.right)
-  #       # p '----- enqueue right'
-  #       q.renqueue(node.right)
-  #       node = node.right
-  #     end
-  #     # p "queue = #{q.current.map {|i| i.data}.to_s}"
-  #     break if q.empty? || node.nil?
-  #   end
-  #   inorder_array unless block_given?
-  # end
+    return preorder_array unless block_given?
+  end
 end
 
 tree = BinaryTree.new([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324])
 # tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
 
-p tree.levelorder
+# p tree.levelorder
 puts
-# tree.insert(98)
-# puts
-# p tree.display
-# puts
-tree.inorder { |i| p i.data unless i.nil?}
+  # tree.insert(98)
+  # puts
+  # p tree.display
+  # puts
+# tree.inorder { |i| p i.data unless i.nil?}
+p tree.preorder
